@@ -52,6 +52,20 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/ddddd-release.jks"
           chmod 600 "$RUNNER_TEMP/ddddd-release.jks"
 
+      - name: Set manager version
+        working-directory: SukiSU-Ultra/manager
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("build.gradle.kts")
+          s = p.read_text(encoding="utf-8")
+          old = 'fun getVersionName(): String {\n    return getGitDescribe()\n}'
+          new = 'fun getVersionName(): String {\n    return "9.9.9 beta"\n}'
+          if old not in s:
+              raise SystemExit("Cannot find upstream manager version function; refusing an unsafe edit")
+          p.write_text(s.replace(old, new, 1), encoding="utf-8")
+          PY
+
       - name: Build SukiSU Ultra Manager APK
         working-directory: SukiSU-Ultra/manager
         env:
