@@ -44,7 +44,7 @@ jobs:
                   if in_string:
                       if escaped:
                           escaped = False
-                      elif c == "\\\\":
+                      elif c == "\\":
                           escaped = True
                       elif c == '"':
                           in_string = False
