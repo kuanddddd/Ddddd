@@ -46,9 +46,13 @@ Ddddd/app/build/outputs/apk/debug/app-debug.apk
 
 ## SukiSU Ultra 管理器（独立构建）
 
-仓库新增了独立的 GitHub Actions 工作流，用于从官方仓库获取 SukiSU Ultra 源码并构建管理器 APK：
+仓库已添加官方 SukiSU Ultra 源码仓库作为 Git 子模块（固定到一个明确的上游提交），位于 `vendor/SukiSU-Ultra/`；管理器完整工程位于 `vendor/SukiSU-Ultra/manager/`。Ddddd 原有 `Ddddd/` 核心源码没有改动。
+
+独立 GitHub Actions 工作流会初始化该子模块并构建管理器 APK：
 
 - 官方源码： https://github.com/SukiSU-Ultra/SukiSU-Ultra
+- 上游固定提交：`645ef9860b9b7f900bb5d1b27e224f2c311d39c0`
+- 管理器版本名：`9.9.9 beta`
 - 工作流：`.github/workflows/build-sukisu-manager.yml`
 - 构建方式：GitHub Actions 中手动运行 **Build SukiSU Ultra Manager**
 - 构建产物：Actions 运行页面中的 `sukisu-ultra-manager-debug` Artifact
