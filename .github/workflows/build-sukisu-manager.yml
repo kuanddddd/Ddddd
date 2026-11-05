@@ -14,18 +14,11 @@ jobs:
   build-manager:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Ddddd repository
+      - name: Check out Ddddd and SukiSU Ultra source
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Check out official SukiSU Ultra source
-        uses: actions/checkout@v4
-        with:
-          repository: SukiSU-Ultra/SukiSU-Ultra
-          ref: main
-          path: SukiSU-Ultra
-          fetch-depth: 0
+          submodules: recursive
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -53,7 +46,7 @@ jobs:
           chmod 600 "$RUNNER_TEMP/ddddd-release.jks"
 
       - name: Set manager version
-        working-directory: SukiSU-Ultra/manager
+        working-directory: vendor/SukiSU-Ultra/manager
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -67,7 +60,7 @@ jobs:
           PY
 
       - name: Build SukiSU Ultra Manager APK
-        working-directory: SukiSU-Ultra/manager
+        working-directory: vendor/SukiSU-Ultra/manager
         env:
           ORG_GRADLE_PROJECT_KEYSTORE_FILE: ${{ runner.temp }}/ddddd-release.jks
           ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -81,6 +74,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sukisu-ultra-manager-debug
-          path: SukiSU-Ultra/manager/app/build/outputs/apk/debug/*.apk
+          path: vendor/SukiSU-Ultra/manager/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
