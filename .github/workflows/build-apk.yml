@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Ddddd/**'
+      - 'Ddddd-1.0.0-Beta-source.zip'
       - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+      - name: Extract source archive
+        run: unzip -q Ddddd-1.0.0-Beta-source.zip -d .
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
