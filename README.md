@@ -43,3 +43,16 @@ Ddddd/app/build/outputs/apk/debug/app-debug.apk
 推送符合工作流触发条件的代码后，GitHub Actions 会自动执行编译，并在构建成功后发布 APK。
 
 当前发布工作流会移除应用内的更新检测功能后再进行编译。
+
+## SukiSU Ultra 管理器（独立构建）
+
+仓库新增了独立的 GitHub Actions 工作流，用于从官方仓库获取 SukiSU Ultra 源码并构建管理器 APK：
+
+- 官方源码： https://github.com/SukiSU-Ultra/SukiSU-Ultra
+- 工作流：`.github/workflows/build-sukisu-manager.yml`
+- 构建方式：GitHub Actions 中手动运行 **Build SukiSU Ultra Manager**
+- 构建产物：Actions 运行页面中的 `sukisu-ultra-manager-debug` Artifact
+
+该流程不会修改或替换 `Ddddd/` 原有应用源码，也不会把 SukiSU 内核代码混入 Ddddd APK。SukiSU 管理器以独立应用构建，使用独立的应用 ID。首次构建需在 Actions 中检查构建日志；官方项目更新或 Android SDK/Gradle 版本变化时，可能需要同步调整构建环境。
+
+源码版权及许可证以 SukiSU Ultra 官方仓库中的文件为准。
