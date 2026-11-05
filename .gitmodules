@@ -1,0 +1,3 @@
+[submodule "vendor/SukiSU-Ultra"]
+	path = vendor/SukiSU-Ultra
+	url = https://github.com/SukiSU-Ultra/SukiSU-Ultra.git
