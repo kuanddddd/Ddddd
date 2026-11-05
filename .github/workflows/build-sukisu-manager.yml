@@ -75,12 +75,23 @@ jobs:
           ORG_GRADLE_PROJECT_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           chmod +x ./gradlew
-          ./gradlew --no-daemon :app:assembleDebug -PIS_PR_BUILD=false
+          ./gradlew --no-daemon :app:assembleDebug -PIS_PR_BUILD=false -PKSU_PACKAGE_NAME=com.lcsnb7878.ddddd -PKSU_NAME=Ddddd
 
-      - name: Upload SukiSU Manager APK
-        uses: actions/upload-artifact@v4
+      - name: Prepare direct APK release asset
+        run: |
+          mkdir -p dist
+          APK="vendor/SukiSU-Ultra/manager/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          cp "$APK" "dist/Ddddd-9.9.9-beta.apk"
+
+      - name: Publish direct APK download
+        uses: softprops/action-gh-release@v2
         with:
-          name: sukisu-ultra-manager-debug
-          path: vendor/SukiSU-Ultra/manager/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 30
+          tag_name: sukisu-manager-9.9.9-beta
+          name: Ddddd 9.9.9 Beta
+          prerelease: true
+          draft: false
+          overwrite_files: true
+          files: dist/Ddddd-9.9.9-beta.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
