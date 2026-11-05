@@ -8,7 +8,7 @@ on:
       - '.github/workflows/build-sukisu-manager.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-manager:
@@ -80,9 +80,12 @@ jobs:
       - name: Prepare direct APK release asset
         run: |
           mkdir -p dist
-          APK="vendor/SukiSU-Ultra/manager/app/build/outputs/apk/debug/app-debug.apk"
-          test -s "$APK"
+          APK="$(find vendor/SukiSU-Ultra/manager/app/build/outputs/apk/debug -maxdepth 1 -type f -name "*.apk" -print -quit)"
+          test -n "$APK" && test -s "$APK"
           cp "$APK" "dist/Ddddd-9.9.9-beta.apk"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print | sort -V | tail -n 1)"
+          test -n "$AAPT"
+          "$AAPT" dump badging "dist/Ddddd-9.9.9-beta.apk" | grep -F "package: name='com.lcsnb7878.ddddd'"
 
       - name: Publish direct APK download
         uses: softprops/action-gh-release@v2
