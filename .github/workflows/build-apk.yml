@@ -23,52 +23,30 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import re
-
           p = Path("app/src/main/java/com/killsuoji/app/MainActivity.kt")
           s = p.read_text(encoding="utf-8")
           for name in ("fetchLatestUpdate", "UpdateCard"):
-              m = re.search(r"(?m)^\\s*(?:private\\s+)?(?:suspend\\s+)?fun\\s+" + name + r"\\b", s)
-              if not m:
+              pos = s.find("fun " + name)
+              if pos < 0:
                   continue
-              start = m.start()
-              brace = s.find("{", m.end())
-              if brace < 0:
-                  raise SystemExit("Cannot locate function body: " + name)
+              start = s.rfind(chr(10), 0, pos) + 1
+              brace = s.find("{", pos)
               depth = 0
-              in_string = False
-              escaped = False
               end = None
               for i in range(brace, len(s)):
-                  c = s[i]
-                  if in_string:
-                      if escaped:
-                          escaped = False
-                      elif c == "\\":
-                          escaped = True
-                      elif c == '"':
-                          in_string = False
-                  elif c == '"':
-                      in_string = True
-                  elif c == "{":
+                  if s[i] == "{":
                       depth += 1
-                  elif c == "}":
+                  elif s[i] == "}":
                       depth -= 1
                       if depth == 0:
                           end = i + 1
                           break
               if end is None:
-                  raise SystemExit("Unclosed function body: " + name)
+                  raise SystemExit("Cannot remove " + name)
               s = s[:start] + s[end:]
-          s = re.sub(r"(?m)^\\s*item\\s*\\{\\s*UpdateCard\\(\\)\\s*\\}\\s*\\n?", "", s)
-          for imp in (
-              "import android.app.DownloadManager",
-              "import android.net.Uri",
-              "import android.os.Environment",
-              "import android.provider.Settings",
-              "import java.net.URL",
-          ):
-              s = s.replace(imp + "\\n", "")
+          s = s.replace("        item { UpdateCard() }" + chr(10), "")
+          for imp in ("import android.app.DownloadManager", "import android.net.Uri", "import android.os.Environment", "import android.provider.Settings", "import java.net.URL"):
+              s = s.replace(imp + chr(10), "")
           p.write_text(s, encoding="utf-8")
           if "UpdateCard" in s or "fetchLatestUpdate" in s:
               raise SystemExit("Update feature removal verification failed")
