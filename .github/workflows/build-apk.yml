@@ -4,12 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Ddddd-1.0.0-Beta-source.zip'
       - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -19,6 +18,60 @@ jobs:
         uses: actions/checkout@v4
       - name: Extract source archive
         run: unzip -q Ddddd-1.0.0-Beta-source.zip -d .
+      - name: Remove update-check feature
+        working-directory: Ddddd
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path("app/src/main/java/com/killsuoji/app/MainActivity.kt")
+          s = p.read_text(encoding="utf-8")
+          for name in ("fetchLatestUpdate", "UpdateCard"):
+              m = re.search(r"(?m)^\\s*(?:private\\s+)?(?:suspend\\s+)?fun\\s+" + name + r"\\b", s)
+              if not m:
+                  continue
+              start = m.start()
+              brace = s.find("{", m.end())
+              if brace < 0:
+                  raise SystemExit("Cannot locate function body: " + name)
+              depth = 0
+              in_string = False
+              escaped = False
+              end = None
+              for i in range(brace, len(s)):
+                  c = s[i]
+                  if in_string:
+                      if escaped:
+                          escaped = False
+                      elif c == "\\\\":
+                          escaped = True
+                      elif c == '"':
+                          in_string = False
+                  elif c == '"':
+                      in_string = True
+                  elif c == "{":
+                      depth += 1
+                  elif c == "}":
+                      depth -= 1
+                      if depth == 0:
+                          end = i + 1
+                          break
+              if end is None:
+                  raise SystemExit("Unclosed function body: " + name)
+              s = s[:start] + s[end:]
+          s = re.sub(r"(?m)^\\s*item\\s*\\{\\s*UpdateCard\\(\\)\\s*\\}\\s*\\n?", "", s)
+          for imp in (
+              "import android.app.DownloadManager",
+              "import android.net.Uri",
+              "import android.os.Environment",
+              "import android.provider.Settings",
+              "import java.net.URL",
+          ):
+              s = s.replace(imp + "\\n", "")
+          p.write_text(s, encoding="utf-8")
+          if "UpdateCard" in s or "fetchLatestUpdate" in s:
+              raise SystemExit("Update feature removal verification failed")
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -31,10 +84,17 @@ jobs:
       - name: Build debug APK
         working-directory: Ddddd
         run: gradle --no-daemon :app:assembleDebug
-      - name: Upload APK
+      - name: Publish APK to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create v1.0.0-beta-no-update Ddddd/app/build/outputs/apk/debug/app-debug.apk \
+            --title "Ddddd 1.0.0 Beta (No Update Checker)" \
+            --notes "Build with update-check and in-app APK update functionality removed."
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ddddd-1.0.0-Beta
+          name: Ddddd-1.0.0-Beta-no-update
           path: Ddddd/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
