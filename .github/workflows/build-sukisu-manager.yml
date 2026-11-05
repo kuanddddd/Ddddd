@@ -48,6 +48,7 @@ jobs:
       - name: Set manager version
         working-directory: vendor/SukiSU-Ultra/manager
         run: |
+          echo "Building SukiSU Ultra Manager 9.9.9 beta"
           python3 - <<'PY'
           from pathlib import Path
           p = Path("build.gradle.kts")
