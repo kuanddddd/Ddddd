@@ -32,7 +32,7 @@ jobs:
       - name: Install Android SDK and NDK packages
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;29.0.14206865" "cmake;3.22.1"
+          sdkmanager --channel=3 "platform-tools" "platforms;android-37" "build-tools;37.0.0" "ndk;29.0.14206865" "cmake;3.22.1"
 
       - name: Restore signing key
         env:
@@ -58,9 +58,7 @@ jobs:
           if old not in s:
               raise SystemExit("Cannot find upstream manager version function; refusing an unsafe edit")
           s = s.replace(old, new, 1)
-          s = s.replace('extra["androidTargetSdkVersion"] = 37', 'extra["androidTargetSdkVersion"] = 36')
-          s = s.replace('extra["androidCompileSdkVersion"] = 37', 'extra["androidCompileSdkVersion"] = 36')
-          s = s.replace('extra["androidBuildToolsVersion"] = "37.0.0"', 'extra["androidBuildToolsVersion"] = "36.0.0"')
+          # Keep upstream Android SDK 37 settings; install preview packages from the canary channel.
           p.write_text(s, encoding="utf-8")
           PY
 
