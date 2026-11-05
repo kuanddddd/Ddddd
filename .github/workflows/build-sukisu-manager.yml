@@ -57,7 +57,11 @@ jobs:
           new = 'fun getVersionName(): String {\n    return "9.9.9 beta"\n}'
           if old not in s:
               raise SystemExit("Cannot find upstream manager version function; refusing an unsafe edit")
-          p.write_text(s.replace(old, new, 1), encoding="utf-8")
+          s = s.replace(old, new, 1)
+          s = s.replace('extra["androidTargetSdkVersion"] = 37', 'extra["androidTargetSdkVersion"] = 36')
+          s = s.replace('extra["androidCompileSdkVersion"] = 37', 'extra["androidCompileSdkVersion"] = 36')
+          s = s.replace('extra["androidBuildToolsVersion"] = "37.0.0"', 'extra["androidBuildToolsVersion"] = "36.0.0"')
+          p.write_text(s, encoding="utf-8")
           PY
 
       - name: Build SukiSU Ultra Manager APK
