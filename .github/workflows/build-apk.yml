@@ -30,6 +30,9 @@ jobs:
               if pos < 0:
                   continue
               start = s.rfind(chr(10), 0, pos) + 1
+              previous = s[:start].rstrip()
+              if previous.endswith("@Composable"):
+                  start = s.rfind("@Composable", 0, start)
               brace = s.find("{", pos)
               depth = 0
               end = None
@@ -50,6 +53,15 @@ jobs:
           p.write_text(s, encoding="utf-8")
           if "UpdateCard" in s or "fetchLatestUpdate" in s:
               raise SystemExit("Update feature removal verification failed")
+      - name: Commit extracted source into repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Ddddd
+          if ! git diff --cached --quiet; then
+            git commit -m "Add extracted Ddddd Android source"
+            git push
+          fi
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
